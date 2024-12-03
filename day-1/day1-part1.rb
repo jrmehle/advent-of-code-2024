@@ -2,7 +2,7 @@
 left_col = []
 right_col = []
 
-File.readlines('input', chomp: true).each do |line|
+File.readlines('../input', chomp: true).each do |line|
   left, right = line.split
   left_col << left
   right_col << right
