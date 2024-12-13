@@ -32,20 +32,26 @@ def differ_by_at_least_one_and_at_most_three?(levels, direction)
   safe_checks.all?(true)
 end
 
-def pass_dampened_check?(levels, direction)
+def safe?(levels, direction)
+  all_increasing_or_decreasing?(levels, direction) && differ_by_at_least_one_and_at_most_three?(levels, direction)
+end
+
+def dampened_safe?(levels, direction)
   safe_checks = []
   puts "*" * 80
   puts "levels for dampening: #{levels.inspect}"
   levels.each do |level|
-    dampened_levels = levels - [level]
+    dampened_levels = levels.dup
+    dampened_levels.delete_at(dampened_levels.index(level))
     puts "dampened_levels: #{dampened_levels.inspect}"
 
-    safe_checks << all_increasing_or_decreasing?(dampened_levels, direction) &&
-                   differ_by_at_least_one_and_at_most_three?(dampened_levels, direction)
+    puts "\tall_increasing_or_decreasing?: #{all_increasing_or_decreasing?(dampened_levels, direction)}"
+    puts "\tdiffer_by_at_least_one_and_at_most_three?: #{differ_by_at_least_one_and_at_most_three?(dampened_levels, direction)}"
+    safe_checks << safe?(dampened_levels, direction)
   end
 
-  puts "dampened safe_checks: #{safe_checks.inspect}"
-  safe_checks.all?(true)
+  puts "dampened checks: #{safe_checks.inspect} | dampened safe?: #{safe_checks.any?(true)}"
+  safe_checks.any?(true)
 end
 
 safe_count = 0
@@ -55,11 +61,10 @@ File.readlines('input', chomp: true).each do |report|
                 'increasing'
               elsif levels[0] > levels[1]
                 'decreasing'
+              else
+                'even'
               end
-
-  safe = all_increasing_or_decreasing?(levels, direction) &&
-         differ_by_at_least_one_and_at_most_three?(levels, direction) &&
-         pass_dampened_check?(levels, direction)
+  safe = (safe?(levels, direction) || dampened_safe?(levels, direction))
   safe_count += 1 if safe
 end
 
